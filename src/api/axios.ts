@@ -2,7 +2,7 @@ import axios from "axios";
 import qs from "qs";
 import { useAuthStore } from "../zustand/authStore";
 
-let DEFAULT_BASE_URL = "https://clinicmanagementsystemserver-production.up.railway.app/api";  
+let DEFAULT_BASE_URL = "https://cmserver-production.up.railway.app/api";  
 
 if(import.meta.env.DEV) DEFAULT_BASE_URL = "http://127.0.0.1:8000/api";
 
