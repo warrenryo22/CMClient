@@ -25,7 +25,7 @@ import { useAuthStore } from "@/zustand/authStore";
 import { SYSTEMACCESS } from "@/enums/systemAccess";
 
 interface AppointmentTableProps {
-  date?: Date;
+  date?: string;
   type?: AppointmentType;
 }
 
@@ -90,12 +90,14 @@ const AppointmentTable = ({ date, type }: AppointmentTableProps) => {
         isOpen={vitalSignsModal.isOpen}
         onClose={handleVitalSignClose}
       />
+    
       <RejectReasonModal
         isOpen={rejectModal.isOpen}
         setReason={setReason}
         reason={reason}
         onClose={handleRejectModalClose}
       />
+     
       <PaginatedTable title="APPOINTMENTS" usePaginated={paginated}>
         <thead className="bg-sky-600 dark:bg-unicorp-blue/50">
           <tr>
