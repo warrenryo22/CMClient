@@ -33,6 +33,9 @@ const AllTodayAppointment = () => {
   const doctorSelectionModal = useModal();
   const apporvalModal = useModal();
   const appointDoctorConfirmationModal = useModal();
+  const manilaNow = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }),
+  );
 
   const [selectedApprovalStatus, setSelectedApprovalStatus] =
     useState<AppointmentStatusData | null>(null);
@@ -46,7 +49,7 @@ const AllTodayAppointment = () => {
   const paginated = usePaginatedTable({
     fetchFunction: doctorAppointmentService.GetDoctorAppointmentPaginated,
     defaultParams: new GetPaginatedDTO({
-      Date: new Date(),
+      Date: formatDate(manilaNow),
     }),
   });
 

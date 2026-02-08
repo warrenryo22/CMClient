@@ -15,7 +15,7 @@ export class GetPaginatedDTO {
     Take = 10;
     Skip = 0;
     SearchValue?: string;
-    Date?: Date;
+    Date?: string;
     AppointmentType?: AppointmentType;
 
     constructor(init?: Partial<GetPaginatedDTO>) {
