@@ -11,7 +11,7 @@ interface MedicalRecordsTabProps {
 const MedicalRecordsTab = ({ records }: MedicalRecordsTabProps) => {
   const navigate = useNavigate();
 
-  if (records.length === 0) {
+  if (!records) {
     return (
       <Card className="dark:bg-gray-800 dark:border-gray-700">
         <CardContent className="py-16 text-center">

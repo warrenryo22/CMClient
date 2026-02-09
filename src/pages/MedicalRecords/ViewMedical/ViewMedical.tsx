@@ -44,7 +44,6 @@ const ViewMedical = () => {
     fetchDetails();
   }, [medId]);
 
-
   const isStudent = !!medicalRecord?.StudentDetails;
   const isStaff = !!medicalRecord?.StaffDetails;
 
@@ -196,7 +195,10 @@ const ViewMedical = () => {
                       Visit Reason
                     </p>
                     <p className="text-base text-gray-900">
-                      {getAppointmentReasonName(medicalRecord?.Reason ?? AppointmentReasons.OTHER_HEALTH_CONCERNS)}
+                      {getAppointmentReasonName(
+                        medicalRecord?.Reason ??
+                          AppointmentReasons.OTHER_HEALTH_CONCERNS,
+                      )}
                     </p>
                   </div>
                 </div>
@@ -290,7 +292,7 @@ const ViewMedical = () => {
                   Action Taken
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  {medicalRecord?.ActionTaken.map((action, index) => (
+                  {medicalRecord?.ActionTaken?.map((action, index) => (
                     <span
                       key={index}
                       className="px-3 py-1.5 bg-sky-100 text-sky-700 rounded-full text-sm font-medium"
@@ -309,29 +311,37 @@ const ViewMedical = () => {
                     Medications / Items Provided
                   </h2>
                   <div className="space-y-3">
-                    {medicalRecord.ItemsProvided.map((item, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-50 p-4 rounded-lg border border-gray-200"
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <p className="font-semibold text-gray-900">
-                              {item.Product.Title}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              Quantity: {item.Quantity}{" "}
-                              {getUOMName(item.Product.UOM)}
-                            </p>
-                          </div>
+                    {medicalRecord?.ItemsProvided?.length > 0 && (
+                      <section className="border-b border-gray-200 pb-6 medical-record-section">
+                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                          <Pill className="w-5 h-5 text-sky-700" />
+                          Medications / Items Provided
+                        </h2>
+
+                        <div className="space-y-3">
+                          {medicalRecord.ItemsProvided.map((item, index) => (
+                            <div
+                              key={index}
+                              className="bg-gray-50 p-4 rounded-lg border border-gray-200"
+                            >
+                              <p className="font-semibold text-gray-900">
+                                {item.Product.Title}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Quantity: {item.Quantity}{" "}
+                                {getUOMName(item.Product.UOM)}
+                              </p>
+
+                              {item.Notes && (
+                                <p className="text-sm text-gray-700 italic mt-2">
+                                  Instructions: {item.Notes}
+                                </p>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                        {item.Notes && (
-                          <p className="text-sm text-gray-700 italic mt-2">
-                            Instructions: {item.Notes}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                      </section>
+                    )}
                   </div>
                 </section>
               )}

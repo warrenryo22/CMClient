@@ -32,7 +32,7 @@ export interface AppointmentStatusData {
 }
 
 interface OverallAppointmentTableProps{
-  type: AppointmentType;
+  type?: AppointmentType;
 }
 
 const OverallAppointmentTable = ({
