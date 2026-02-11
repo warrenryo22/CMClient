@@ -75,7 +75,10 @@ const AllPatients = () => {
                     addedClass="view-icon bg-green-100 hover:bg-green-600 mr-2"
                     icon={() => <Eye size={15} />}
                     onClick={() => {
-                        navigate(`/user-profile/${item.Id}`);
+                      const isWalkin = item.PatientType === "WALKIN PATIENT";
+                      const id = isWalkin ? item.WalkinId : item.Id;
+
+                      navigate(`/user-profile/${id}?is_walkin=${isWalkin}`);
                     }}
                   />
                 </TableData>

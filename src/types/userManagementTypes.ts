@@ -34,7 +34,8 @@ export class GetDoctorsDTO {
 }
 
 export class GetPatientsDTO {
-  Id: number = 0;
+  Id?: number;
+  WalkinId?: number;
   FullName: string = "";
   Role?: UserRoles;
   Birthdate?: Date;
@@ -46,19 +47,24 @@ export class GetPatientsDTO {
 }
 
 export class GetUserDetailsDTO {
-  UserDetailsId: number = 0;
-  FullName: string = "";
-  Role: UserRoles = UserRoles.STUDENTS;
-  Email: string = "";
-  Phone: string = "";
-  Address: string = "";
+  UserDetailsId?: number;
+  WalkinId?: number;
+
+  FullName?: string;
+  Role?: UserRoles;
+  Email?: string;
+  Phone?: string;
+  Address?: string;
+
   DateOfBirth?: Date;
   Gender?: Gender;
   AvatarUrl?: string;
+
   TeacherDetails?: {
     Department: Department;
     Position: Position;
   };
+
   StudentDetails?: {
     StudentNo: string;
     Course: Courses;
@@ -66,6 +72,10 @@ export class GetUserDetailsDTO {
   };
 
   constructor(init?: Partial<GetUserDetailsDTO>) {
-    Object.assign(this, init);
+    if (!init) return;
+
+    Object.entries(init).forEach(([key, value]) => {
+      (this as any)[key] = value === null ? undefined : value;
+    });
   }
 }

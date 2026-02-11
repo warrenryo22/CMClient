@@ -1,9 +1,8 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import Label from "../form/Label";
 import Input from "../input/InputField";
-import Checkbox from "../input/Checkbox";
 import Button from "../buttons/Button";
 import { useAuthStore } from "../../zustand/authStore";
 import { useForm } from "react-hook-form";
@@ -12,7 +11,6 @@ import { authService } from "../../services/authService";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const accessToken = useAuthStore((state) => state.accessToken);
   const userClaims = useAuthStore((state) => state.userClaims);
@@ -112,7 +110,7 @@ export default function SignInForm() {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Checkbox checked={isChecked} onChange={setIsChecked} />
                 <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
@@ -125,7 +123,7 @@ export default function SignInForm() {
               >
                 Forgot password?
               </Link>
-            </div>
+            </div> */}
             <div>
               <Button isLoading={isLoading} className="w-full" size="sm">
                 Sign in
@@ -134,7 +132,7 @@ export default function SignInForm() {
           </div>
         </form>
 
-        <div className="mt-5">
+        {/* <div className="mt-5">
           <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
             Don&apos;t have an account? {""}
             <Link
@@ -144,7 +142,7 @@ export default function SignInForm() {
               Sign Up
             </Link>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

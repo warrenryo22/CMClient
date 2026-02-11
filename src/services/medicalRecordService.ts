@@ -184,9 +184,14 @@ class MedicalRecordService {
 
   async GetMedicalCertificates(
     userDetailsId: number,
+    isWalkin: boolean
   ): Promise<MedicalCertificateDTO[]> {
     try {
-      const response = await api.get(`medicalrecords/list-medical-records/${userDetailsId}`);
+      const response = await api.get(`medicalrecords/list-medical-records/${userDetailsId}`, {
+        params: {
+          is_walkin: isWalkin
+        }
+      });
       return response.data.Data;
     } catch (error) {
       return [];

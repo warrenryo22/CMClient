@@ -6,7 +6,7 @@ import AppointmentsTab from "./components/AppointmentsTab";
 import CertificatesTab from "./components/CertificatesTab";
 import OverallDetails from "./components/OverallDetails";
 import { GetUserDetailsDTO } from "@/types/userManagementTypes";
-import { useParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 import { userManagementService } from "@/services/userManagementService";
 import {
   AppointmentData,
@@ -18,6 +18,9 @@ import { medicalRecordService } from "@/services/medicalRecordService";
 
 const UserProfile = () => {
   const { userDetailsId } = useParams();
+  const [searchParams] = useSearchParams();
+
+  const isWalkin = searchParams.get("is_walkin") === "true";
   const [userDetails, setUserDetails] = useState<GetUserDetailsDTO>(
     new GetUserDetailsDTO(),
   );
@@ -55,6 +58,7 @@ const UserProfile = () => {
       if (!userDetailsId) return;
       const response = await userManagementService.GetUserProfileDetails(
         Number(userDetailsId),
+        isWalkin
       );
       setUserDetails(response);
     });
@@ -65,6 +69,7 @@ const UserProfile = () => {
       if (!userDetailsId) return;
       const response = await userManagementService.GetUserMedicalRecords(
         Number(userDetailsId),
+        isWalkin
       );
       setMedicalRecords(response);
     });
@@ -75,6 +80,7 @@ const UserProfile = () => {
       if (!userDetailsId) return;
       const response = await medicalRecordService.GetMedicalCertificates(
         Number(userDetailsId),
+        isWalkin
       );
       setCertificates(response);
     });

@@ -1,8 +1,8 @@
-import { GetUserDetailsDTO } from '@/types/userManagementTypes';
-import { formatDate } from '../utils';
-import {  User, Calendar, MapPin } from 'lucide-react';
-import { formatStatus } from '@/utilities/helpers';
-import { Gender, UserRoles } from '@/enums/commons';
+import { GetUserDetailsDTO } from "@/types/userManagementTypes";
+import { formatDate } from "../utils";
+import { User, Calendar, MapPin } from "lucide-react";
+import { formatStatus } from "@/utilities/helpers";
+import { Courses, Department, Gender, Position, UserRoles, YearLevels } from "@/enums/commons";
 
 interface ProfileSidebarProps {
   user: GetUserDetailsDTO;
@@ -18,7 +18,7 @@ const ProfileSidebar = ({ user }: ProfileSidebarProps) => {
             {user.AvatarUrl ? (
               <img
                 src={user.AvatarUrl}
-                alt={user.FullName}
+                alt={user.FullName || "Patient"}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -32,35 +32,17 @@ const ProfileSidebar = ({ user }: ProfileSidebarProps) => {
 
       {/* Profile Info */}
       <div className="pt-14 pb-6 px-6 text-center border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-          {user.FullName}
-        </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          {formatStatus(UserRoles[user.Role])}
-        </p>
+        {user.FullName && (
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+            {user.FullName}
+          </h2>
+        )}
+        {user.Role !== undefined && UserRoles[user.Role] && (
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {formatStatus(UserRoles[user.Role])}
+          </p>
+        )}
       </div>
-
-      {/* Action Buttons */}
-      {/* <div className="flex gap-2 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-        <button className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-          <div className="w-10 h-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-sky-700 dark:text-sky-400" />
-          </div>
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Message</span>
-        </button>
-        <button className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-          <div className="w-10 h-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
-            <Mail className="w-5 h-5 text-sky-700 dark:text-sky-400" />
-          </div>
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Email</span>
-        </button>
-        <button className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-          <div className="w-10 h-10 rounded-full bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
-            <Phone className="w-5 h-5 text-sky-700 dark:text-sky-400" />
-          </div>
-          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Call</span>
-        </button>
-      </div> */}
 
       {/* Personal Info */}
       <div className="px-6 py-5">
@@ -68,56 +50,123 @@ const ProfileSidebar = ({ user }: ProfileSidebarProps) => {
           Personal Info
         </h3>
         <div className="space-y-3.5">
-          <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
-              Email Address:
-            </label>
-            <p className="text-sm text-gray-900 dark:text-white break-words">
-              {user.Email}
-            </p>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
-              Phone Number:
-            </label>
-            <p className="text-sm text-gray-900 dark:text-white">
-              {user.Phone}
-            </p>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1 mb-1">
-              <MapPin className="w-3 h-3" />
-              Address:
-            </label>
-            <p className="text-sm text-gray-900 dark:text-white leading-relaxed">
-              {user.Address}
-            </p>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1 mb-1">
-              <Calendar className="w-3 h-3" />
-              Date of Birth:
-            </label>
-            <p className="text-sm text-gray-900 dark:text-white">
-              {formatDate(user.DateOfBirth ?? new Date)}
-            </p>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
-              Gender:
-            </label>
-            <p className="text-sm text-gray-900 dark:text-white">
-              {Gender[user.Gender ?? Gender.MALE]}
-            </p>
-          </div>
-          <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
-              Role:
-            </label>
-            <span className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400">
-              {formatStatus(UserRoles[user.Role])}
-            </span>
-          </div>
+          {user.Email && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+                Email Address:
+              </label>
+              <p className="text-sm text-gray-900 dark:text-white break-words">
+                {user.Email}
+              </p>
+            </div>
+          )}
+
+          {user.Phone && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+                Phone Number:
+              </label>
+              <p className="text-sm text-gray-900 dark:text-white">
+                {user.Phone}
+              </p>
+            </div>
+          )}
+
+          {user.Address && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1 mb-1">
+                <MapPin className="w-3 h-3" />
+                Address:
+              </label>
+              <p className="text-sm text-gray-900 dark:text-white leading-relaxed">
+                {user.Address}
+              </p>
+            </div>
+          )}
+
+          {user.DateOfBirth && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1 mb-1">
+                <Calendar className="w-3 h-3" />
+                Date of Birth:
+              </label>
+              <p className="text-sm text-gray-900 dark:text-white">
+                {formatDate(user.DateOfBirth)}
+              </p>
+            </div>
+          )}
+
+          {user.Gender !== undefined && Gender[user.Gender] && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+                Gender:
+              </label>
+              <p className="text-sm text-gray-900 dark:text-white">
+                {Gender[user.Gender]}
+              </p>
+            </div>
+          )}
+
+          {user.StudentDetails && (
+            <>
+              <div>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+                  Student No:
+                </label>
+                <p className="text-sm text-gray-900 dark:text-white">
+                  {user.StudentDetails.StudentNo}
+                </p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+                  Program:
+                </label>
+                <p className="text-sm text-gray-900 dark:text-white">
+                  {formatStatus(Courses[user.StudentDetails.Course])}
+                </p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+                  Year Level:
+                </label>
+                <p className="text-sm text-gray-900 dark:text-white">
+                  {formatStatus(YearLevels[user.StudentDetails.YearLevel])}
+                </p>
+              </div>
+            </>
+          )}
+
+          {user.TeacherDetails && (
+            <>
+              <div>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+                  Department:
+                </label>
+                <p className="text-sm text-gray-900 dark:text-white">
+                  {formatStatus(Department[user.TeacherDetails.Department])}
+                </p>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+                  Position:
+                </label>
+                <p className="text-sm text-gray-900 dark:text-white">
+                  {formatStatus(Position[user.TeacherDetails.Position])}
+                </p>
+              </div>
+            </>
+          )}
+
+          {user.Role !== undefined && UserRoles[user.Role] && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+                Role:
+              </label>
+              <span className="inline-block px-2.5 py-1 text-xs font-medium rounded-full bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400">
+                {formatStatus(UserRoles[user.Role])}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

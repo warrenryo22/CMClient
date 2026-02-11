@@ -86,9 +86,14 @@ class UserManagementService {
 
   async GetUserProfileDetails(
     userDetailsId: number,
+    isWalkin: boolean
   ): Promise<GetUserDetailsDTO> {
     try {
-      const response = await api.get(`users/get-user-profile/${userDetailsId}`);
+      const response = await api.get(`users/get-user-profile/${userDetailsId}`, {
+        params: {
+          is_walkin: isWalkin
+        }
+      });
       return response.data.Data;
     } catch (error) {
       return new GetUserDetailsDTO();
@@ -97,10 +102,15 @@ class UserManagementService {
 
   async GetUserMedicalRecords(
     userDetailsId: number,
+    isWalkin: boolean
   ): Promise<MedicalRecordSummary[]> {
     try {
       const response = await api.get(
-        `users/get-user-medical-records/${userDetailsId}`,
+        `users/get-user-medical-records/${userDetailsId}`,{
+          params: {
+            is_walkin: isWalkin
+          }
+        }
       );
       return response.data.Data;
     } catch (error) {
@@ -109,7 +119,7 @@ class UserManagementService {
   }
 
   async GetUserAppointments(
-   userDetailsId: number, params: { month: string; year: string }
+   userDetailsId: number, params: { month: string; year: string },
   ): Promise<AppointmentData[]>{
     try {
       const response = await api.get(`users/get-user-appointments/${userDetailsId}`, {
