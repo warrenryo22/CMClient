@@ -1,8 +1,21 @@
-import { useNavigate } from 'react-router';
-import { MedicalRecordSummary } from '../types';
-import { getAppointmentReasonLabel, formatDate } from '../utils';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card/Card';
-import { FileText, Calendar, Clock, Stethoscope, User, ChevronRight } from 'lucide-react';
+import { useNavigate } from "react-router";
+import { MedicalRecordSummary } from "../types";
+import { getAppointmentReasonLabel, formatDate } from "../utils";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/card/Card";
+import {
+  FileText,
+  Calendar,
+  Clock,
+  Stethoscope,
+  User,
+  ChevronRight,
+} from "lucide-react";
 
 interface MedicalRecordsTabProps {
   records: MedicalRecordSummary[];
@@ -11,7 +24,7 @@ interface MedicalRecordsTabProps {
 const MedicalRecordsTab = ({ records }: MedicalRecordsTabProps) => {
   const navigate = useNavigate();
 
-  if (!records) {
+  if (!records || records.length === 0) {
     return (
       <Card className="dark:bg-gray-800 dark:border-gray-700">
         <CardContent className="py-16 text-center">
@@ -30,7 +43,13 @@ const MedicalRecordsTab = ({ records }: MedicalRecordsTabProps) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {records.map((record) => (
-        <Card key={record.recordId} onClick={() => {navigate(`/view-medical-records/${record.recordId}`)}} className="dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer group">
+        <Card
+          key={record.recordId}
+          onClick={() => {
+            navigate(`/view-medical-records/${record.recordId}`);
+          }}
+          className="dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer group"
+        >
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -39,7 +58,9 @@ const MedicalRecordsTab = ({ records }: MedicalRecordsTabProps) => {
                     <FileText className="w-5 h-5 text-sky-700 dark:text-sky-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-base">{record.referenceNo}</CardTitle>
+                    <CardTitle className="text-base">
+                      {record.referenceNo}
+                    </CardTitle>
                     <CardDescription className="text-xs dark:text-gray-400">
                       Medical Record
                     </CardDescription>

@@ -27,9 +27,10 @@ import { SYSTEMACCESS } from "@/enums/systemAccess";
 interface AppointmentTableProps {
   date?: string;
   type?: AppointmentType;
+  isToday?: boolean;
 }
 
-const AppointmentTable = ({ date, type }: AppointmentTableProps) => {
+const AppointmentTable = ({ type , isToday}: AppointmentTableProps) => {
   const appointmentDetailsModal = useModal();
   const { systemAccess } = useAuthStore();
   const rejectModal = useModal();
@@ -44,7 +45,7 @@ const AppointmentTable = ({ date, type }: AppointmentTableProps) => {
   const paginated = usePaginatedTable({
     fetchFunction: doctorAppointmentService.GetDoctorAppointmentPaginated,
     defaultParams: new GetPaginatedDTO({
-      Date: date,
+      IsToday: isToday,
       AppointmentType: type,
     }),
   });
@@ -170,10 +171,7 @@ const AppointmentTable = ({ date, type }: AppointmentTableProps) => {
                     />
                   )}
 
-                {item.Status === AppointmentStatus.APPROVED &&
-                  date &&
-                  new Date(date).toDateString() ===
-                    new Date().toDateString() && (
+                {(item.Status === AppointmentStatus.APPROVED && isToday) && (
                     <IconButton
                       tooltipTitle="BEGIN CHECKUP"
                       addedClass="edit-icon mr-2"

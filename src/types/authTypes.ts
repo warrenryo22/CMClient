@@ -41,6 +41,8 @@ export class RegisterUserDTO {
   Avatar: string = "";
   YearLevel: number = 0;
   Course: number = 0;
+  AcademicYear: string = "";
+  Adviser: number = 0;
   Specialization: string = "";
   LicenseNumber?: string;
   Department?: Department;
@@ -48,6 +50,8 @@ export class RegisterUserDTO {
   Gender?: Gender;
   BirthDate?: Date;
   EmployeeNo?: string;
+  EmergencyContactName?: string;
+  EmergencyContactPhone?: string;
 
   constructor(init?: Partial<RegisterUserDTO>) {
     return Object.assign(this, init);

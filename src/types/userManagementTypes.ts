@@ -24,7 +24,7 @@ export class GetDoctorsDTO {
   Id: number = 0;
   FullName: string = "";
   Specialization: DoctorSpecializations =
-    DoctorSpecializations.GENERAL_PRACTITIONER;
+    DoctorSpecializations.GENERAL_DOCTOR;
   LicenseNumber: string = "";
   ImageUrl?: string;
 
@@ -50,22 +50,29 @@ export class GetUserDetailsDTO {
   UserDetailsId?: number;
   WalkinId?: number;
 
-  FullName?: string;
+  FirstName?: string;
+  LastName?: string;
+  MiddleName?: string;
   Role?: UserRoles;
   Email?: string;
   Phone?: string;
   Address?: string;
+  EmergencyContactName?: string;
+  EmergencyContactPhone?: string;
 
   DateOfBirth?: Date;
   Gender?: Gender;
   AvatarUrl?: string;
 
-  TeacherDetails?: {
+  EmployeeDetails?: {
+    EmployeeNo: string;
     Department: Department;
     Position: Position;
   };
 
   StudentDetails?: {
+    Adviser?: string;
+    AcademicYear?: string;
     StudentNo: string;
     Course: Courses;
     YearLevel: YearLevels;

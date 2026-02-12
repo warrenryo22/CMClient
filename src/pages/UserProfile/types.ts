@@ -15,6 +15,8 @@ export interface UserProfileData {
   role: UserRoles;
   email: string;
   phone: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
   address: string;
   dateOfBirth: Date;
   gender: string;
@@ -26,19 +28,31 @@ export interface UserProfileData {
   staffDetails?: StaffDetailsDTO;
 
   // Additional employee-like fields for teachers/staff
-  employeeNumber?: string;
-  department?: string;
-  position?: string;
-  employmentType?: string;
-  employeeStatus?: string;
-  jobTitle?: string;
-  startDate?: Date;
-  endDate?: Date;
-  startShift?: string;
-  endShift?: string;
-  rateType?: string;
-  dailyRate?: number;
-  hourlyRate?: number;
+  
+}
+
+export class UserProfileData {
+  userId: number = 0;
+  firstName: string = "";
+  lastName: string = "";
+  middleName?: string;
+  role: UserRoles = UserRoles.STUDENTS;
+  email: string = "";
+  phone: string = "";
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  address: string = "";
+  dateOfBirth: Date = new Date();
+  gender: string = "";
+  avatarUrl?: string;
+
+  studentDetails?: StudentDetailsDTO;
+  teacherDetails?: TeacherDetailsDTO;
+  staffDetails?: StaffDetailsDTO;
+
+  constructor(init?: Partial<UserProfileData>) {
+    return Object.assign(this, init);
+  }
 }
 
 export interface MedicalRecordSummary {
@@ -84,6 +98,16 @@ export class MedicalCertificateDTO {
   recommendations: string = "";
 
   constructor(init?: Partial<MedicalCertificateDTO>) {
+    return Object.assign(this, init);
+  }
+}
+
+
+export class AdviserDTO {
+  Id : number = 0;
+  Name: string = "";
+
+  constructor(init?: Partial<AdviserDTO>) {
     return Object.assign(this, init);
   }
 }

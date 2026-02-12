@@ -1,5 +1,5 @@
 import api from "@/api/axios";
-import { AppointmentData, MedicalRecordSummary } from "@/pages/UserProfile/types";
+import { AdviserDTO, AppointmentData, MedicalRecordSummary } from "@/pages/UserProfile/types";
 import {
   GeneralResponse,
   GetPaginatedDTO,
@@ -126,6 +126,15 @@ class UserManagementService {
         params: params
       });
 
+      return response.data.Data;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async GetAllAdvisersList(): Promise<AdviserDTO[]>{
+    try {
+      const response = await api.get(`users/get-all-advisers-list`);
       return response.data.Data;
     } catch (error) {
       return [];

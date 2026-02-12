@@ -17,6 +17,7 @@ export class GetPaginatedDTO {
     SearchValue?: string;
     Date?: string;
     AppointmentType?: AppointmentType;
+    IsToday?: boolean;
 
     constructor(init?: Partial<GetPaginatedDTO>) {
         Object.assign(this, init);

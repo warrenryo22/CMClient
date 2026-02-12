@@ -17,6 +17,8 @@ import Input from "@/components/input/InputField";
 import Button from "@/components/buttons/Button";
 import { authService } from "@/services/authService";
 import DatePicker from "@/components/input/DatePicker";
+import { AdviserDTO } from "../UserProfile/types";
+import { userManagementService } from "@/services/userManagementService";
 
 interface UserModalProps {
   isOpen: boolean;
@@ -25,6 +27,7 @@ interface UserModalProps {
 }
 const UserModal = ({ isOpen, onClose, accRole }: UserModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [advisers, setAdvisers] = useState<AdviserDTO[]>([]);
   //   const [showPassword, setShowPassword] = useState(false);
   //   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -48,6 +51,16 @@ const UserModal = ({ isOpen, onClose, accRole }: UserModalProps) => {
     reset();
     onClose(false);
   };
+
+  const fetchAdvisers = async () => {
+    if (!isOpen) return;
+    const response = await userManagementService.GetAllAdvisersList();
+    setAdvisers(response);
+  };
+
+  useEffect(() => {
+    fetchAdvisers();
+  }, []);
 
   const onSubmit = async (data: RegisterUserDTO) => {
     setIsLoading(true);
@@ -303,23 +316,142 @@ const UserModal = ({ isOpen, onClose, accRole }: UserModalProps) => {
               }
             />
           </div>
+          <div className="mb-3 mt-4">
+            <h1 className="uppercase text-sky-700 font-semibold">
+              Basic Information
+            </h1>
+          </div>
+          <div className="mb-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <Label>Emergency Contact Number</Label>
+              <Input
+                type="text"
+                placeholder="Enter Emergency Contact Number"
+                {...register("EmergencyContactPhone", {
+                  required: "Emergency contact phone number required.",
+                  pattern: {
+                    value: /^(09|\+639)\d{9}$/,
+                    message: "Invalid emergency contact phone number",
+                  },
+                })}
+                error={!!errors.EmergencyContactPhone}
+                hint={
+                  touchedFields.EmergencyContactPhone || isSubmitted
+                    ? errors.EmergencyContactPhone?.message
+                    : ""
+                }
+              />
+            </div>
+            <div>
+              <Label>Emergency Contact Name</Label>
+              <Input
+                type="text"
+                placeholder="Enter Emergency Contact Name"
+                {...register("EmergencyContactName", {
+                  required: "Emergency contact name is required.",
+                })}
+                error={!!errors.EmergencyContactName}
+                hint={
+                  touchedFields.EmergencyContactName || isSubmitted
+                    ? errors.Region?.message
+                    : ""
+                }
+              />
+            </div>
+          </div>
+          <div className="mb-3">
+            <Label>Address</Label>
+            <Input
+              type="text"
+              placeholder="Enter Address"
+              {...register("Address", { required: "Address required." })}
+              error={!!errors.Address}
+              hint={
+                touchedFields.Address || isSubmitted
+                  ? errors.Address?.message
+                  : ""
+              }
+            />
+          </div>
+          <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <Label>City</Label>
+              <Input
+                type="text"
+                placeholder="Enter City"
+                {...register("City", { required: "City required." })}
+                error={!!errors.City}
+                hint={
+                  touchedFields.City || isSubmitted ? errors.City?.message : ""
+                }
+              />
+            </div>
+            <div>
+              <Label>Region</Label>
+              <Input
+                type="text"
+                placeholder="Enter Region"
+                {...register("Region", { required: "Region is required" })}
+                error={!!errors.Region}
+                hint={
+                  touchedFields.Region || isSubmitted
+                    ? errors.Region?.message
+                    : ""
+                }
+              />
+            </div>
+          </div>
           {selectedUser === UserRoles.STUDENTS && (
             <>
-              <div className="mb-3">
-                <Label>Student Number</Label>
-                <Input
-                  type="number"
-                  placeholder="ex. 20016296"
-                  {...register("StudentNumber", {
-                    required: "Student number required.",
-                  })}
-                  error={!!errors.StudentNumber}
-                  hint={
-                    touchedFields.StudentNumber || isSubmitted
-                      ? errors.StudentNumber?.message
-                      : ""
-                  }
-                />
+              <div className="mb-3 mt-4">
+                <h1 className="uppercase text-sky-700 font-semibold">
+                  Student Information
+                </h1>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="mb-3">
+                  <Label>Student Number</Label>
+                  <Input
+                    type="number"
+                    placeholder="ex. 20016296"
+                    {...register("StudentNumber", {
+                      required: "Student number required.",
+                    })}
+                    error={!!errors.StudentNumber}
+                    hint={
+                      touchedFields.StudentNumber || isSubmitted
+                        ? errors.StudentNumber?.message
+                        : ""
+                    }
+                  />
+                </div>
+                <div className="mb-3">
+                  <Label>Adviser</Label>
+                  <Controller
+                    name="Adviser"
+                    control={control}
+                    rules={{ required: "Adviser is required." }}
+                    render={({ field, fieldState }) => (
+                      <SearchableSelect
+                        placeholder="Select a Adviser"
+                        options={advisers.map((adviser) => ({
+                          value: adviser.Id,
+                          label: adviser.Name,
+                        }))}
+                        onChange={(value) => {
+                          field.onChange(value);
+                        }}
+                        value={field.value}
+                        className={fieldState.error ? "border-red-500" : ""}
+                      />
+                    )}
+                  />
+                  {touchedFields.Adviser || isSubmitted ? (
+                    <span className="mt-1 block text-xs text-red-500">
+                      {errors.Adviser?.message}
+                    </span>
+                  ) : null}
+                </div>
               </div>
               <div className="mb-3">
                 <Label>Course</Label>
@@ -378,6 +510,22 @@ const UserModal = ({ isOpen, onClose, accRole }: UserModalProps) => {
                     {errors.YearLevel?.message}
                   </span>
                 ) : null}
+              </div>
+              <div className="mb-3">
+                <Label>Academic Year</Label>
+                <Input
+                  type="text"
+                  placeholder="ex. 2025-2026"
+                  {...register("AcademicYear", {
+                    required: "Academic Year is required.",
+                  })}
+                  error={!!errors.AcademicYear}
+                  hint={
+                    touchedFields.AcademicYear || isSubmitted
+                      ? errors.AcademicYear?.message
+                      : ""
+                  }
+                />
               </div>
             </>
           )}
@@ -463,6 +611,11 @@ const UserModal = ({ isOpen, onClose, accRole }: UserModalProps) => {
           )}
           {selectedUser === UserRoles.DOCTORS && (
             <>
+              <div className="mb-3 mt-4">
+                <h1 className="uppercase text-sky-700 font-semibold">
+                  Doctor Information
+                </h1>
+              </div>
               <div className="mb-3">
                 <Label>Specialization</Label>
                 <Controller
@@ -508,48 +661,6 @@ const UserModal = ({ isOpen, onClose, accRole }: UserModalProps) => {
               </div>
             </>
           )}
-          <div className="mb-3">
-            <Label>Address</Label>
-            <Input
-              type="text"
-              placeholder="Enter Address"
-              {...register("Address", { required: "Address required." })}
-              error={!!errors.Address}
-              hint={
-                touchedFields.Address || isSubmitted
-                  ? errors.Address?.message
-                  : ""
-              }
-            />
-          </div>
-          <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label>City</Label>
-              <Input
-                type="text"
-                placeholder="Enter City"
-                {...register("City", { required: "City required." })}
-                error={!!errors.City}
-                hint={
-                  touchedFields.City || isSubmitted ? errors.City?.message : ""
-                }
-              />
-            </div>
-            <div>
-              <Label>Region</Label>
-              <Input
-                type="text"
-                placeholder="Enter Region"
-                {...register("Region", { required: "Region is required" })}
-                error={!!errors.Region}
-                hint={
-                  touchedFields.Region || isSubmitted
-                    ? errors.Region?.message
-                    : ""
-                }
-              />
-            </div>
-          </div>
 
           <div className="flex gap-1.5 justify-end">
             <Button

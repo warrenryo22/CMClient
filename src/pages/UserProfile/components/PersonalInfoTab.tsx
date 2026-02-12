@@ -1,11 +1,11 @@
-import { UserProfileData } from '../types';
-import { UserRoles } from '@/enums/commons';
-import { getCourseLabel, getYearLevelLabel, formatDate } from '../utils';
+import { Courses, Department, Position, UserRoles, YearLevels } from '@/enums/commons';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/card/Card';
-import { Building2, Briefcase, Calendar, DollarSign, GraduationCap } from 'lucide-react';
+import { Building2, Briefcase, GraduationCap, User } from 'lucide-react';
+import { GetUserDetailsDTO } from '@/types/userManagementTypes';
+import { formatStatus } from '@/utilities/helpers';
 
 interface PersonalInfoTabProps {
-  user: UserProfileData;
+  user: GetUserDetailsDTO;
 }
 
 const PersonalInfoTab = ({ user }: PersonalInfoTabProps) => {
@@ -19,7 +19,7 @@ const PersonalInfoTab = ({ user }: PersonalInfoTabProps) => {
   );
 
   const renderEmployeeInfo = () => {
-    if (user.role !== UserRoles.TEACHERS && user.role !== UserRoles.CLINIC_STAFF) {
+    if (user.Role !== UserRoles.TEACHERS && user.Role !== UserRoles.CLINIC_STAFF) {
       return null;
     }
 
@@ -37,57 +37,9 @@ const PersonalInfoTab = ({ user }: PersonalInfoTabProps) => {
           </CardHeader>
           <CardContent>
             <dl>
-              <InfoField label="Employee Number" value={user.employeeNumber} />
-              <InfoField label="Department" value={user.department} />
-              <InfoField label="Employment Type" value={user.employmentType} />
-              <InfoField label="Employee Status" value={user.employeeStatus} />
-              <InfoField label="Job Position" value={user.position} />
-              <InfoField label="Job Title" value={user.jobTitle} />
-            </dl>
-          </CardContent>
-        </Card>
-
-        <Card className="dark:bg-gray-800 dark:border-gray-700">
-          <CardHeader>
-            <div className="flex items-center gap-2 text-sky-700 dark:text-sky-400">
-              <Calendar className="w-5 h-5" />
-              <CardTitle className="text-lg">Employment Timeline</CardTitle>
-            </div>
-            <CardDescription className="dark:text-gray-400">
-              Employment dates and shift schedule
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <dl>
-              <InfoField label="Start Date" value={user.startDate ? formatDate(user.startDate) : undefined} />
-              <InfoField label="End Date" value={user.endDate ? formatDate(user.endDate) : '--'} />
-              <InfoField label="Start Shift" value={user.startShift} />
-              <InfoField label="End Shift" value={user.endShift} />
-            </dl>
-          </CardContent>
-        </Card>
-
-        <Card className="dark:bg-gray-800 dark:border-gray-700">
-          <CardHeader>
-            <div className="flex items-center gap-2 text-sky-700 dark:text-sky-400">
-              <DollarSign className="w-5 h-5" />
-              <CardTitle className="text-lg">Employee Rate Breakdown</CardTitle>
-            </div>
-            <CardDescription className="dark:text-gray-400">
-              Shows hourly/monthly rate and applicable compensation rules
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <dl>
-              <InfoField label="Rate Type" value={user.rateType} />
-              <InfoField 
-                label="Daily Rate" 
-                value={user.dailyRate !== undefined ? `₱ ${user.dailyRate.toFixed(2)}` : undefined} 
-              />
-              <InfoField 
-                label="Hourly Rate" 
-                value={user.hourlyRate !== undefined ? `₱ ${user.hourlyRate.toFixed(2)}` : undefined} 
-              />
+              <InfoField label="Employee Number" value={user.EmployeeDetails?.EmployeeNo} />
+              <InfoField label="Department" value={formatStatus(Department[user.EmployeeDetails?.Department || 0])} />
+              <InfoField label="Job Position" value={formatStatus(Position[user.EmployeeDetails?.Position || 0])} />
             </dl>
           </CardContent>
         </Card>
@@ -96,7 +48,7 @@ const PersonalInfoTab = ({ user }: PersonalInfoTabProps) => {
   };
 
   const renderStudentInfo = () => {
-    if (user.role !== UserRoles.STUDENTS || !user.studentDetails) {
+    if (user.Role !== UserRoles.STUDENTS || !user.StudentDetails) {
       return null;
     }
 
@@ -113,16 +65,45 @@ const PersonalInfoTab = ({ user }: PersonalInfoTabProps) => {
         </CardHeader>
         <CardContent>
           <dl>
-            <InfoField label="Course" value={getCourseLabel(user.studentDetails.Course)} />
-            <InfoField label="Year Level" value={getYearLevelLabel(user.studentDetails.Year)} />
+            <InfoField label="Course" value={formatStatus(Courses[user.StudentDetails.Course])} />
+            <InfoField label="Year Level" value={formatStatus(YearLevels[user.StudentDetails.YearLevel])} />
+            <InfoField label="Adviser" value={user.StudentDetails?.Adviser || '--'} />
+            <InfoField label="Academic Year" value={user.StudentDetails?.AcademicYear || '--'} />
+
           </dl>
         </CardContent>
       </Card>
     );
   };
 
+  const renderBasicInfo = () => {
+    return (
+      <Card className="dark:bg-gray-800 dark:border-gray-700">
+        <CardHeader>
+          <div className="flex items-center gap-2 text-sky-700 dark:text-sky-400">
+            <User className="w-5 h-5" />
+            <CardTitle className="text-lg">Basic Information</CardTitle>
+          </div>
+          <CardDescription className="dark:text-gray-400">
+            Personal and contact details
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <dl>
+            <InfoField label="First Name" value={user.FirstName} />
+            <InfoField label="Last Name" value={user.LastName} />
+            <InfoField label="Middle Name" value={user.MiddleName} />
+            <InfoField label="Address" value={user.Address} />
+            <InfoField label="Emergency Contact Name" value={user.EmergencyContactName} />
+            <InfoField label="Emergency Contact Phone" value={user.EmergencyContactPhone} />
+          </dl>
+        </CardContent>
+      </Card>
+    );
+  }
   return (
     <div className="space-y-6">
+      {renderBasicInfo()}
       {renderEmployeeInfo()}
       {renderStudentInfo()}
 

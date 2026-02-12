@@ -1,11 +1,8 @@
 import PageMeta from "@/components/common/PageMeta";
 import AppointmentTable from "./AppointmentTable";
-import { formatDate } from "@/utilities/helpers";
 
 const TodayAppointment = () => {
-  const manilaNow = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }),
-  );
+
   return (
     <div>
       <PageMeta
@@ -13,7 +10,7 @@ const TodayAppointment = () => {
         description="CMS | Appointment"
       />
 
-      <AppointmentTable date={formatDate(manilaNow)} type={undefined} />
+      <AppointmentTable isToday={true} type={undefined} />
     </div>
   );
 };

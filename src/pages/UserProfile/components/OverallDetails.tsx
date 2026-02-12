@@ -22,7 +22,7 @@ const OverallDetails = ({ user, tabs }: OverallDetailsProps) => {
             <CustomTabs
               tabs={tabs}
               variant="minimal"
-              defaultKey="medical-records"
+              defaultKey="personal-info"
             />
           </div>
         </div>

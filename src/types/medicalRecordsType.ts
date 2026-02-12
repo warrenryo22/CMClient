@@ -50,6 +50,8 @@ export class StaffDetailsDTO {
 }
 
 export class StudentDetailsDTO {
+  Adviser?: string;
+  AcademicYear?: string;
   Course: Courses = Courses.BACHELOR_OF_SCIENCE_IN_INFORMATION_TECHNOLOGY;
   Year: YearLevels = YearLevels.FIRST_YEAR;
 

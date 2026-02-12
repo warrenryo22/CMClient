@@ -15,6 +15,7 @@ import {
 } from "./types";
 import UPSkeletonLoading from "./components/UPSkeletonLoading";
 import { medicalRecordService } from "@/services/medicalRecordService";
+import PersonalInfoTab from "./components/PersonalInfoTab";
 
 const UserProfile = () => {
   const { userDetailsId } = useParams();
@@ -99,6 +100,11 @@ const UserProfile = () => {
   }, [userDetailsId]);
 
   const tabs: TabItem[] = [
+     {
+      key: "personal-info",
+      title: "Personal Information",
+      content: <PersonalInfoTab user={userDetails} />,
+    },
     {
       key: "medical-records",
       title: "Medical Records",
