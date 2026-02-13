@@ -28,6 +28,65 @@ interface StepConfig {
   icon: React.ComponentType<{ size?: number }>;
 }
 
+// ─── Philippine Time helpers ────────────────────────────────────────────────
+// Always derive "now" in PHT (UTC+8) so the calendar is correct regardless
+// of where the server or browser is hosted.
+
+const PH_OFFSET_MS = 8 * 60 * 60 * 1000; // UTC+8
+
+/** Returns a Date whose UTC fields represent the current PHT wall-clock time. */
+const getPHTNow = (): Date => new Date(Date.now() + PH_OFFSET_MS);
+
+/**
+ * Returns a Date representing midnight PHT for the given UTC Date.
+ * We store calendar dates as UTC midnight so all UTC accessors stay correct.
+ */
+const toPHTMidnight = (date: Date): Date => {
+  const phtMs = date.getTime() + PH_OFFSET_MS;
+  const phtDate = new Date(phtMs);
+  return new Date(
+    Date.UTC(
+      phtDate.getUTCFullYear(),
+      phtDate.getUTCMonth(),
+      phtDate.getUTCDate(),
+    ),
+  );
+};
+
+/** "Today" midnight in PHT, expressed as a UTC Date for easy comparison. */
+const getPHTToday = (): Date => toPHTMidnight(new Date());
+
+/**
+ * Checks whether a time slot has already passed, using PHT.
+ * Comparing the slot's PHT wall time against current PHT wall time.
+ */
+const isSlotInPHTPast = (time: string, date: Date): boolean => {
+  const phtNow = getPHTNow();
+  const phtToday = toPHTMidnight(new Date());
+  const dateUTC = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+  );
+
+  // Only relevant when the selected date is today in PHT
+  if (dateUTC !== phtToday.getTime()) return false;
+
+  const [hours, minutes] = time.split(":").map(Number);
+  // Build a PHT wall-clock timestamp for this slot
+  const slotPHTMs =
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      hours,
+      minutes,
+    ) - PH_OFFSET_MS; // convert PHT → UTC epoch
+
+  return slotPHTMs <= phtNow.getTime() - PH_OFFSET_MS;
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 const AppointmentModal = ({
   isOpen,
   onClose,
@@ -41,7 +100,11 @@ const AppointmentModal = ({
     useState<AppointmentReasons | null>(null);
   const [reason, setReason] = useState<string>("");
   const [rescheduleReason, setRescheduleReason] = useState<string>("");
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  // Initialise to PHT current month so the calendar opens on the right month
+  const [currentMonth, setCurrentMonth] = useState<Date>(() => {
+    const phtNow = getPHTNow();
+    return new Date(Date.UTC(phtNow.getUTCFullYear(), phtNow.getUTCMonth(), 1));
+  });
   const [bookedAppointments, setBookedAppointments] =
     useState<GetAppointmentDatesDTO>();
   const [isLoading, setIsLoading] = useState(false);
@@ -68,8 +131,6 @@ const AppointmentModal = ({
         "Dental Pain or Oral Health Concerns",
       [AppointmentReasons.SKIN_CONDITIONS_OR_RASHES]:
         "Skin Conditions or Rashes",
-      // [AppointmentReasons.MEDICAL_CLEARANCE_OR_HEALTH_CERTIFICATION]:
-      //   "Medical Clearance or Health Certification",
       [AppointmentReasons.FOLLOW_UP_CHECK_UP]: "Follow-up Check-up",
       [AppointmentReasons.OTHER_HEALTH_CONCERNS]: "Other Health Concerns",
     };
@@ -81,8 +142,8 @@ const AppointmentModal = ({
 
     const getDates = async () => {
       setIsLoading(true);
-      const year = currentMonth.getFullYear();
-      const month = String(currentMonth.getMonth() + 1).padStart(2, "0");
+      const year = currentMonth.getUTCFullYear();
+      const month = String(currentMonth.getUTCMonth() + 1).padStart(2, "0");
       const monthParam = `${year}-${month}`;
       const response = await appointmentService.GetAppointmentDates(monthParam);
       setBookedAppointments(response);
@@ -103,24 +164,6 @@ const AppointmentModal = ({
 
   const timeSlots = generateTimeSlots();
 
-  const isTimeSlotInPast = (time: string, date: Date): boolean => {
-    const now = new Date();
-    const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-    const dateUTC = Date.UTC(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate()
-    );
-
-    if (dateUTC !== todayUTC) return false;
-
-    const [hours, minutes] = time.split(":").map(Number);
-    const slot = new Date(date);
-    slot.setHours(hours, minutes, 0, 0);
-
-    return slot <= now;
-  };
-
   const areAllTimeSlotsBooked = (dateStr: string): boolean => {
     const bookedCount = bookedAppointments?.[dateStr]?.length || 0;
     return bookedCount >= timeSlots.length;
@@ -140,8 +183,8 @@ const AppointmentModal = ({
   };
 
   const getCalendarDays = (): (Date | null)[] => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
+    const year = currentMonth.getUTCFullYear();
+    const month = currentMonth.getUTCMonth();
     const firstDay = new Date(Date.UTC(year, month, 1));
     const lastDay = new Date(Date.UTC(year, month + 1, 0));
     const daysInMonth = lastDay.getUTCDate();
@@ -159,16 +202,15 @@ const AppointmentModal = ({
   const handleDateSelect = (date: Date | null) => {
     if (!date) return;
 
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    const selectedUTC = new Date(date);
-    selectedUTC.setUTCHours(0, 0, 0, 0);
-
-    // const dayOfWeek = date.getUTCDay();
+    const phtToday = getPHTToday();
+    const dateUTC = Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+    );
     const dateStr = getUTCDateString(date);
 
-    // if (dayOfWeek === 0 || dayOfWeek === 6) return;
-    if (selectedUTC < today) return;
+    if (dateUTC < phtToday.getTime()) return;
     if (areAllTimeSlotsBooked(dateStr)) return;
 
     setSelectedDate(date);
@@ -198,10 +240,10 @@ const AppointmentModal = ({
             NewDate: selectedDate,
             NewTime: selectedTime,
             RescheduleReason: rescheduleReason,
-          })
+          }),
         );
 
-        if(response) handleClose(true);
+        if (response) handleClose(true);
       } catch (error) {
         toast.error("Failed to reschedule appointment");
       } finally {
@@ -210,7 +252,6 @@ const AppointmentModal = ({
       return;
     }
 
-    // For new appointment
     if (!selectedReason) return;
     if (
       selectedReason === AppointmentReasons.OTHER_HEALTH_CONCERNS &&
@@ -253,19 +294,22 @@ const AppointmentModal = ({
   const changeMonth = (offset: number) => {
     setCurrentMonth((prevMonth) => {
       return new Date(
-        prevMonth.getFullYear(),
-        prevMonth.getMonth() + offset,
-        1
+        Date.UTC(
+          prevMonth.getUTCFullYear(),
+          prevMonth.getUTCMonth() + offset,
+          1,
+        ),
       );
     });
   };
 
   const formatDate = (date: Date): string =>
-    date.toLocaleDateString("en-US", {
+    date.toLocaleDateString("en-PH", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
+      timeZone: "Asia/Manila",
     });
 
   const stepConfigs: StepConfig[] = isReschedule
@@ -331,9 +375,14 @@ const AppointmentModal = ({
                   ← Prev
                 </button>
                 <h3 className="text-xl font-bold text-gray-800">
-                  {currentMonth.toLocaleDateString("en-US", {
+                  {new Date(
+                    currentMonth.getUTCFullYear(),
+                    currentMonth.getUTCMonth(),
+                    1,
+                  ).toLocaleDateString("en-PH", {
                     month: "long",
                     year: "numeric",
+                    timeZone: "Asia/Manila",
                   })}
                 </h3>
                 <button
@@ -353,7 +402,7 @@ const AppointmentModal = ({
                     >
                       {day}
                     </div>
-                  )
+                  ),
                 )}
                 {isLoading && (
                   <div className="absolute inset-0 bg-gray-50/60 h-full flex items-center justify-center z-10">
@@ -365,14 +414,16 @@ const AppointmentModal = ({
                     return <div key={`empty-${idx}`} className="p-2" />;
 
                   const dateStr = getUTCDateString(date);
-                  const todayUTC = new Date();
-                  todayUTC.setUTCHours(0, 0, 0, 0);
-                  const isPast = date < todayUTC;
-                  // const dayOfWeek = date.getUTCDay();
-                  // const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                  const phtToday = getPHTToday();
+                  const dateUTC = Date.UTC(
+                    date.getUTCFullYear(),
+                    date.getUTCMonth(),
+                    date.getUTCDate(),
+                  );
+                  const isPast = dateUTC < phtToday.getTime();
                   const allBooked = areAllTimeSlotsBooked(dateStr);
                   const available = getAvailableSlotsCount(dateStr);
-                  const disabled = isPast  || allBooked;
+                  const disabled = isPast || allBooked;
 
                   return (
                     <button
@@ -392,8 +443,8 @@ const AppointmentModal = ({
                             allBooked
                               ? "text-red-500 font-semibold"
                               : available < timeSlots.length
-                              ? "text-amber-500"
-                              : "text-green-500"
+                                ? "text-amber-500"
+                                : "text-green-500"
                           }`}
                         >
                           {allBooked ? "Full" : `${available} left`}
@@ -426,7 +477,7 @@ const AppointmentModal = ({
                 {timeSlots.map((time) => {
                   const disabled =
                     isTimeSlotBooked(time) ||
-                    isTimeSlotInPast(time, selectedDate);
+                    isSlotInPHTPast(time, selectedDate);
                   return (
                     <button
                       key={time}
@@ -438,7 +489,7 @@ const AppointmentModal = ({
                           : "bg-white border border-gray-200 hover:border-sky-500 hover:bg-sky-50"
                       }`}
                     >
-                      {time}
+                      {formatTimeTo12Hour(time)}
                     </button>
                   );
                 })}
@@ -493,7 +544,7 @@ const AppointmentModal = ({
                             checked={selectedReason === reasonEnum}
                             onChange={() => {
                               setSelectedReason(
-                                reasonEnum as AppointmentReasons
+                                reasonEnum as AppointmentReasons,
                               );
                               if (
                                 reasonEnum !==
@@ -543,14 +594,12 @@ const AppointmentModal = ({
                           !reason.trim())) || submitLoading
                   }
                   className={`flex-1 py-3 rounded-lg text-sm transition ${
-                    (
-                      isReschedule && appointmentId
-                        ? rescheduleReason.trim()
-                        : selectedReason &&
+                    isReschedule && appointmentId
+                      ? rescheduleReason.trim()
+                      : selectedReason &&
                           (selectedReason !==
                             AppointmentReasons.OTHER_HEALTH_CONCERNS ||
                             reason.trim())
-                    )
                       ? "bg-sky-600 text-white hover:bg-sky-700"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
