@@ -163,7 +163,7 @@ const ProductsModal = ({ isOpen, onClose, productId }: ProductsModalProps) => {
               </div>
               <div>
                 <Label className="flex items-center gap-2" htmlFor="amount">
-                  Packaging Qty{" "}
+                  Quantity per unit{" "}
                   {/* <Tooltip title="How many quantity that will add on your inventory on a delivery">
                     <InfoIcon className="text-red-500" size={14} />
                   </Tooltip> */}

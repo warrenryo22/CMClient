@@ -164,10 +164,10 @@ const AppointmentModal = ({
     const selectedUTC = new Date(date);
     selectedUTC.setUTCHours(0, 0, 0, 0);
 
-    const dayOfWeek = date.getUTCDay();
+    // const dayOfWeek = date.getUTCDay();
     const dateStr = getUTCDateString(date);
 
-    if (dayOfWeek === 0 || dayOfWeek === 6) return;
+    // if (dayOfWeek === 0 || dayOfWeek === 6) return;
     if (selectedUTC < today) return;
     if (areAllTimeSlotsBooked(dateStr)) return;
 
@@ -368,11 +368,11 @@ const AppointmentModal = ({
                   const todayUTC = new Date();
                   todayUTC.setUTCHours(0, 0, 0, 0);
                   const isPast = date < todayUTC;
-                  const dayOfWeek = date.getUTCDay();
-                  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+                  // const dayOfWeek = date.getUTCDay();
+                  // const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
                   const allBooked = areAllTimeSlotsBooked(dateStr);
                   const available = getAvailableSlotsCount(dateStr);
-                  const disabled = isPast || isWeekend || allBooked;
+                  const disabled = isPast  || allBooked;
 
                   return (
                     <button
@@ -386,7 +386,7 @@ const AppointmentModal = ({
                       }`}
                     >
                       <span className="font-semibold">{date.getUTCDate()}</span>
-                      {!isWeekend && !isPast && (
+                      {!isPast && (
                         <span
                           className={`text-xs mt-1 ${
                             allBooked

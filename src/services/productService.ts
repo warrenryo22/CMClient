@@ -108,6 +108,15 @@ class ProductService{
             return false;
         }
     }
+
+    async GetAIProductSuggestion($appointmentId: number) : Promise<GetProductPaginatedDTO[]>{
+        try {
+            const response = await api.get(`products/get-ai-recommend-product/${$appointmentId}`);
+            return response.data.Data;
+        } catch (error) {
+            return [];
+        }
+    }
 }
 
 export const productService = new ProductService();

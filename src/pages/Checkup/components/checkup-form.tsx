@@ -10,6 +10,7 @@ import {
   CheckCircle,
   Trash,
   ShoppingBag,
+  Sparkles,
 } from "lucide-react";
 import {
   Card,
@@ -53,6 +54,7 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
   const navigate = useNavigate();
   const { appointmentId } = useParams();
   const [submitLoading, setSubmitLoadig] = useTransition();
+
   const {
     handleSubmit,
     register,
@@ -72,12 +74,24 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
       }),
     }),
   });
+
   const [selectedProduct, setSelectedProduct] =
     useState<GetProductPaginatedDTO | null>(null);
   const [temporaryQuantity, setTemporaryQuantity] = useState<number>(0);
   const [availableQuantity, setAvailableQuantity] = useState<number>(0);
+
+  // AI suggestion state
+  const [aiSuggestions, setAiSuggestions] = useState<GetProductPaginatedDTO[]>(
+    [],
+  );
+  const [isAiLoading, setIsAiLoading] = useTransition();
+  const [checkedSuggestions, setCheckedSuggestions] = useState<
+    Record<number, boolean>
+  >({});
+
   const selectedActions = watch("ActionTaken");
   const allAddedProducts = watch("ItemsProvided");
+
   const paginated = usePaginatedTable({
     fetchFunction: productService.GetProductsPaginated,
   });
@@ -86,6 +100,25 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
     control,
     name: "ItemsProvided",
   });
+
+  // When the paginated products finish loading, derive AI suggestions.
+  useEffect(() => {
+    if (
+      !paginated.isLoading &&
+      paginated.tableValues.length > 0 &&
+      (selectedActions.includes(ActionTaken.MEDICATION_GIVEN) ||
+        selectedActions.includes(ActionTaken.FIRST_AID))
+    ) {
+      setIsAiLoading(async () => {
+        const suggestions = await productService.GetAIProductSuggestion(
+          Number(appointmentId),
+        );
+        setAiSuggestions(suggestions);
+      });
+      setAiSuggestions([]);
+      setCheckedSuggestions({});
+    }
+  }, [paginated.isLoading, paginated.tableValues, selectedActions]);
 
   const actionOptions = Object.values(ActionTaken)
     .filter((v) => typeof v === "number")
@@ -101,7 +134,6 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
     const updated = selectedActions.includes(action)
       ? selectedActions.filter((a) => a !== action)
       : [...selectedActions, action];
-
     setValue("ActionTaken", updated);
   };
 
@@ -133,15 +165,15 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
     const hasMedication = selectedActions?.includes(
       ActionTaken.MEDICATION_GIVEN,
     );
-
     const hasFirstAid = selectedActions?.includes(ActionTaken.FIRST_AID);
 
     if (!hasMedication && !hasFirstAid) {
       setValue("ItemsProvided", []);
-
       setSelectedProduct(null);
       setTemporaryQuantity(0);
       setAvailableQuantity(0);
+      setAiSuggestions([]);
+      setCheckedSuggestions({});
     }
   }, [selectedActions, setValue]);
 
@@ -156,18 +188,56 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
       toast.error("Please add a quantity");
       return;
     }
-
     append(
       new ItemsProvided({
         Product: selectedProduct,
         Quantity: temporaryQuantity,
       }),
     );
-
     setTemporaryQuantity(0);
     setSelectedProduct(null);
     setAvailableQuantity(0);
   };
+
+  // Toggle AI suggestion checkbox: adds or removes product from the table
+  const handleSuggestionCheck = (
+    product: GetProductPaginatedDTO,
+    checked: boolean,
+  ) => {
+    setCheckedSuggestions((prev) => ({ ...prev, [product.Id]: checked }));
+
+    if (checked) {
+      // Add with quantity 1 by default (or max available if only 1)
+      const qty = Math.min(1, product.Quantity);
+      append(
+        new ItemsProvided({
+          Product: product,
+          Quantity: qty,
+        }),
+      );
+    } else {
+      // Remove from table
+      const index = fields.findIndex((f) => f.Product.Id === product.Id);
+      if (index !== -1) remove(index);
+    }
+  };
+
+  // Keep checkbox state in sync if product is manually removed from table
+  useEffect(() => {
+    setCheckedSuggestions((prev) => {
+      const updated = { ...prev };
+      for (const id of Object.keys(updated)) {
+        const numId = Number(id);
+        const stillInTable = fields.some((f) => f.Product.Id === numId);
+        if (!stillInTable) {
+          updated[numId] = false;
+        }
+      }
+      return updated;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields.length]);
+
   return (
     <div>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -198,14 +268,11 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                         placeholder="Describe the patient's symptoms..."
                         {...field}
                         value={field.value ?? ""}
-                        className={`
-                          min-h-24 resize-none border-slate-200 focus:border-sky-500 focus:ring-sky-500
-                          ${
-                            fieldState.error
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }
-                      `}
+                        className={`min-h-24 resize-none border-slate-200 focus:border-sky-500 focus:ring-sky-500 ${
+                          fieldState.error
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
                         rows={4}
                       />
                       {fieldState.error && (
@@ -218,6 +285,7 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                 />
               </div>
 
+              {/* Vital Signs */}
               <div className="space-y-3">
                 <Label className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-700">
                   <Activity className="h-4 w-4 text-slate-500" />
@@ -289,14 +357,14 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                   </div>
                   <div className="space-y-1.5">
                     <Label
-                      htmlFor="pulseRate"
+                      htmlFor="height"
                       className="text-xs font-medium text-slate-500"
                     >
                       Height (cm)
                     </Label>
                     <Input
                       id="height"
-                      placeholder="e.g., 72"
+                      placeholder="e.g., 165"
                       {...register("VitalSigns.Height", {
                         required: "Height is required",
                       })}
@@ -310,14 +378,14 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                   </div>
                   <div className="space-y-1.5">
                     <Label
-                      htmlFor="pulseRate"
+                      htmlFor="weight"
                       className="text-xs font-medium text-slate-500"
                     >
                       Weight (kg)
                     </Label>
                     <Input
                       id="weight"
-                      placeholder="e.g., 72"
+                      placeholder="e.g., 60"
                       {...register("VitalSigns.Weight", {
                         required: "Weight is required",
                       })}
@@ -332,6 +400,7 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                 </div>
               </div>
 
+              {/* Findings */}
               <div className="space-y-2">
                 <Label
                   htmlFor="findings"
@@ -349,14 +418,11 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                         placeholder="Document your findings and observations..."
                         {...field}
                         value={field.value ?? ""}
-                        className={`
-                          min-h-24 resize-none border-slate-200 focus:border-sky-500 focus:ring-sky-500
-                          ${
-                            fieldState.error
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }
-                      `}
+                        className={`min-h-24 resize-none border-slate-200 focus:border-sky-500 focus:ring-sky-500 ${
+                          fieldState.error
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
                         rows={4}
                       />
                       {fieldState.error && (
@@ -369,6 +435,7 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                 />
               </div>
 
+              {/* Action Taken */}
               <div className="space-y-3">
                 <Label className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-700">
                   <Pill className="h-4 w-4 text-slate-500" />
@@ -396,6 +463,7 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                 </div>
               </div>
 
+              {/* Products section (only when Medication Given or First Aid is selected) */}
               {(selectedActions.includes(ActionTaken.MEDICATION_GIVEN) ||
                 selectedActions.includes(ActionTaken.FIRST_AID)) && (
                 <>
@@ -403,6 +471,8 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                     <ShoppingBag className="h-4 w-4 text-slate-500" />
                     Products
                   </Label>
+
+                  {/* Search row */}
                   <div className="flex items-center w-full gap-3">
                     <SearchablePaginatedSelect
                       tableValues={paginated.tableValues.filter(
@@ -446,7 +516,6 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                         value={temporaryQuantity}
                         onChange={(e) => {
                           const value = Number(e.target.value);
-
                           if (value < 0) {
                             setTemporaryQuantity(0);
                           } else if (value > availableQuantity) {
@@ -463,6 +532,129 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                       </Button>
                     </div>
                   </div>
+
+                  {/* ── AI Suggested Products ── */}
+                  <div className="rounded-lg border border-sky-100 bg-sky-50 p-3">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Sparkles className="h-3.5 w-3.5 text-sky-500" />
+                      <span className="text-xs font-semibold text-sky-700">
+                        AI Suggested
+                      </span>
+                    </div>
+
+                    {/* Loading skeleton */}
+                    {(paginated.isLoading || isAiLoading) && (
+                      <div className="flex flex-col gap-2">
+                        {[1, 2, 3].map((i) => (
+                          <div
+                            key={i}
+                            className="rounded-lg border border-sky-100 bg-white p-2.5 space-y-1.5 animate-pulse"
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="h-3.5 w-3.5 rounded bg-sky-100 shrink-0" />
+                              <div className="h-3 w-28 rounded bg-sky-100" />
+                              <div className="h-3 w-16 rounded bg-sky-50" />
+                            </div>
+                            <div className="h-2.5 w-4/5 rounded bg-sky-50 ml-6" />
+                            <div className="h-2.5 w-2/3 rounded bg-sky-50 ml-6" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Suggestion cards */}
+                    {!paginated.isLoading &&
+                      !isAiLoading &&
+                      aiSuggestions.length > 0 && (
+                        <div className="flex flex-col gap-2">
+                          {aiSuggestions.map((product) => {
+                            const isOutOfStock = product.Quantity === 0;
+                            const isAlreadyAdded = allAddedProducts.some(
+                              (ap) => ap.Product.Id === product.Id,
+                            );
+                            const isChecked =
+                              !!checkedSuggestions[product.Id] ||
+                              isAlreadyAdded;
+
+                            return (
+                              <label
+                                key={product.Id}
+                                className={`
+                                  flex items-start gap-2.5 rounded-lg border p-2.5 transition-colors
+                                  ${
+                                    isOutOfStock
+                                      ? "cursor-not-allowed border-slate-200 bg-white opacity-60"
+                                      : isChecked
+                                        ? "cursor-pointer border-sky-300 bg-sky-100"
+                                        : "cursor-pointer border-slate-200 bg-white hover:border-sky-200 hover:bg-sky-50"
+                                  }
+                                `}
+                              >
+                                <input
+                                  type="checkbox"
+                                  className="mt-0.5 h-3.5 w-3.5 shrink-0 accent-sky-600"
+                                  disabled={isOutOfStock}
+                                  checked={isChecked}
+                                  onChange={(e) =>
+                                    handleSuggestionCheck(
+                                      product,
+                                      e.target.checked,
+                                    )
+                                  }
+                                />
+                                <div className="flex flex-col gap-0.5 min-w-0">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span
+                                      className={`text-xs font-semibold ${
+                                        isOutOfStock
+                                          ? "text-slate-400"
+                                          : isChecked
+                                            ? "text-sky-700"
+                                            : "text-slate-800"
+                                      }`}
+                                    >
+                                      {product.Title}
+                                    </span>
+                                    <span className="text-[10px] text-slate-400">
+                                      {formatStatus(UOM[product.UOM])}
+                                    </span>
+                                    {isOutOfStock ? (
+                                      <span className="inline-flex items-center rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                                        Out of stock
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600">
+                                        {product.Quantity} available
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p
+                                    className={`text-[11px] leading-relaxed ${
+                                      isOutOfStock
+                                        ? "text-slate-400"
+                                        : "text-slate-500"
+                                    }`}
+                                  >
+                                    {product.AIRecommendation}
+                                  </p>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                    {/* Empty state */}
+                    {!paginated.isLoading &&
+                      !isAiLoading &&
+                      aiSuggestions.length === 0 && (
+                        <p className="text-xs text-slate-400">
+                          No suggestions available.
+                        </p>
+                      )}
+                  </div>
+
+                  {/* Products table */}
                   <SimpleTable tableLoading={false}>
                     <thead className="bg-gray-50 dark:bg-gray-900">
                       <tr className="border-b border-gray-100 dark:border-gray-800">
@@ -473,91 +665,111 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {fields.length > 0 ? (
-                        fields?.map((item, index) => {
-                          return (
-                            <>
-                              <tr key={index}>
-                                <SimpleTableData>
-                                  {item.Product.Title}
-                                </SimpleTableData>
-                                <SimpleTableData>
-                                  {formatStatus(UOM[item.Product.UOM])}
-                                </SimpleTableData>
-                                <SimpleTableData>
-                                  <div className="max-w-[200px]">
-                                    <Input
-                                      className="w-full"
-                                      type="number"
-                                      {...register(
-                                        `ItemsProvided.${index}.Quantity`,
-                                        {
-                                          valueAsNumber: true,
-                                          validate: (value) =>
-                                            value <= item.Product.Quantity ||
-                                            `Only ${item.Product.Quantity} items available in stock`,
+                        fields?.map((item, index) => (
+                          <>
+                            <tr key={index}>
+                              <SimpleTableData>
+                                <span className="text-sky-500 font-semibold">{item.Product.Title}</span>
+                              </SimpleTableData>
+                              <SimpleTableData>
+                                {formatStatus(UOM[item.Product.UOM])}
+                              </SimpleTableData>
+                              <SimpleTableData>
+                                <div className="max-w-[200px]">
+                                  <Input
+                                    className="w-full"
+                                    type="number"
+                                    min={1}
+                                    max={item.Product.Quantity}
+                                    {...register(
+                                      `ItemsProvided.${index}.Quantity`,
+                                      {
+                                        valueAsNumber: true,
+                                        min: {
+                                          value: 1,
+                                          message:
+                                            "Quantity must be at least 1",
                                         },
-                                      )}
-                                    />
-                                    {errors.ItemsProvided?.[index]
-                                      ?.Quantity && (
-                                      <p className="mt-1 text-xs text-red-500">
-                                        {
-                                          errors.ItemsProvided[index].Quantity
-                                            ?.message
-                                        }
-                                      </p>
+                                        max: {
+                                          value: item.Product.Quantity,
+                                          message: `Only ${item.Product.Quantity} available in stock`,
+                                        },
+                                        validate: (value) =>
+                                          value <= item.Product.Quantity ||
+                                          `Only ${item.Product.Quantity} items available in stock`,
+                                        onChange: (e) => {
+                                          const raw = Number(e.target.value);
+                                          if (raw < 1) {
+                                            setValue(
+                                              `ItemsProvided.${index}.Quantity`,
+                                              1,
+                                            );
+                                          } else if (
+                                            raw > item.Product.Quantity
+                                          ) {
+                                            setValue(
+                                              `ItemsProvided.${index}.Quantity`,
+                                              item.Product.Quantity,
+                                            );
+                                          }
+                                        },
+                                      },
                                     )}
-                                  </div>
-                                </SimpleTableData>
-                                <SimpleTableData>
-                                  <IconButton
-                                    tooltipTitle="REMOVE"
-                                    addedClass="reject-icon mr-2"
-                                    icon={() => <Trash size={15} />}
-                                    onClick={() => remove(index)}
                                   />
-                                </SimpleTableData>
-                              </tr>
-                              <tr className="bg-gray-50">
-                                <SimpleTableData colSpan={tableHead.length}>
-                                  <div className="space-y-1">
-                                    <Label className="text-xs text-slate-600">
-                                      {item.Product.Title} Notes
-                                    </Label>
-
-                                    <Controller
-                                      control={control}
-                                      name={`ItemsProvided.${index}.Notes`}
-                                      render={({ field, fieldState }) => (
-                                        <>
-                                          <TextArea
-                                            placeholder={`Add notes for ${item.Product.Title} (e.g. dosage instructions, special handling)`}
-                                            {...field}
-                                            value={field.value ?? ""}
-                                            rows={2}
-                                            className={`
-                           resize-none border-slate-200 focus:border-sky-500 focus:ring-sky-500
-                          ${
-                            fieldState.error
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }
-                      `}
-                                          />
-                                          {fieldState.error && (
-                                            <p className="text-red-500 text-sm mt-1">
-                                              {fieldState.error.message}
-                                            </p>
-                                          )}
-                                        </>
-                                      )}
-                                    />
-                                  </div>
-                                </SimpleTableData>
-                              </tr>
-                            </>
-                          );
-                        })
+                                  {errors.ItemsProvided?.[index]?.Quantity && (
+                                    <p className="mt-1 text-xs text-red-500">
+                                      {
+                                        errors.ItemsProvided[index].Quantity
+                                          ?.message
+                                      }
+                                    </p>
+                                  )}
+                                </div>
+                              </SimpleTableData>
+                              <SimpleTableData>
+                                <IconButton
+                                  tooltipTitle="REMOVE"
+                                  addedClass="reject-icon mr-2"
+                                  icon={() => <Trash size={15} />}
+                                  onClick={() => remove(index)}
+                                />
+                              </SimpleTableData>
+                            </tr>
+                            <tr className="bg-gray-50">
+                              <SimpleTableData colSpan={tableHead.length}>
+                                <div className="space-y-1">
+                                  <Label className="text-xs text-slate-600">
+                                    {item.Product.Title} Notes
+                                  </Label>
+                                  <Controller
+                                    control={control}
+                                    name={`ItemsProvided.${index}.Notes`}
+                                    render={({ field, fieldState }) => (
+                                      <>
+                                        <TextArea
+                                          placeholder={`Add notes for ${item.Product.Title} (e.g. dosage instructions, special handling)`}
+                                          {...field}
+                                          value={field.value ?? ""}
+                                          rows={2}
+                                          className={`resize-none border-slate-200 focus:border-sky-500 focus:ring-sky-500 ${
+                                            fieldState.error
+                                              ? "border-red-500"
+                                              : "border-gray-300"
+                                          }`}
+                                        />
+                                        {fieldState.error && (
+                                          <p className="text-red-500 text-sm mt-1">
+                                            {fieldState.error.message}
+                                          </p>
+                                        )}
+                                      </>
+                                    )}
+                                  />
+                                </div>
+                              </SimpleTableData>
+                            </tr>
+                          </>
+                        ))
                       ) : (
                         <tr>
                           <SimpleTableData tdClass="text-center" colSpan={6}>
@@ -570,6 +782,7 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                 </>
               )}
 
+              {/* Remarks */}
               <div className="space-y-2">
                 <Label
                   htmlFor="remarks"
@@ -587,14 +800,11 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
                         placeholder="Add any additional remarks..."
                         {...field}
                         value={field.value ?? ""}
-                        className={`
-                          min-h-24 resize-none border-slate-200 focus:border-sky-500 focus:ring-sky-500
-                          ${
-                            fieldState.error
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }
-                      `}
+                        className={`min-h-24 resize-none border-slate-200 focus:border-sky-500 focus:ring-sky-500 ${
+                          fieldState.error
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
                         rows={4}
                       />
                       {fieldState.error && (
@@ -609,6 +819,8 @@ export function CheckupForm({ initialData }: CheckupFormProps) {
             </CardContent>
           </Card>
         </div>
+
+        {/* Footer actions */}
         <div className="flex justify-end gap-2 mt-4">
           <Button
             variant="outline"

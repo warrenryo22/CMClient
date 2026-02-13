@@ -6,7 +6,6 @@ import {
   getYearLevelName,
   getAppointmentReasonName,
   getActionTakenName,
-  getUOMName,
 } from "./utils";
 import {
   FileText,
@@ -21,7 +20,7 @@ import { useParams, useNavigate } from "react-router";
 import { medicalRecordService } from "@/services/medicalRecordService";
 import Button from "@/components/buttons/Button";
 import ContentLoading from "@/components/loadings/ContentLoading";
-import { AppointmentReasons } from "@/enums/commons";
+import { AppointmentReasons, UOM } from "@/enums/commons";
 
 const ViewMedical = () => {
   const { medId } = useParams();
@@ -329,7 +328,7 @@ const ViewMedical = () => {
                               </p>
                               <p className="text-sm text-gray-600">
                                 Quantity: {item.Quantity}{" "}
-                                {getUOMName(item.Product.UOM)}
+                                {UOM[item.Product.UOM] || "pcs"}
                               </p>
 
                               {item.Notes && (

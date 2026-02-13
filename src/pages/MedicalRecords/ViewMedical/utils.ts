@@ -1,4 +1,4 @@
-import { AppointmentReasons, Courses, YearLevels, ActionTaken, UOM } from '@/enums/commons';
+import { AppointmentReasons, Courses, YearLevels, ActionTaken} from '@/enums/commons';
 
 export const getCourseName = (course: Courses): string => {
   const courseNames: Record<Courses, string> = {
@@ -51,22 +51,22 @@ export const getActionTakenName = (action: ActionTaken): string => {
   return actionNames[action];
 };
 
-export const getUOMName = (uom: UOM): string => {
-  const uomNames: Record<UOM, string> = {
-    [UOM.PIECE]: 'pc',
-    [UOM.TABLET]: 'tablet',
-    [UOM.CAPSULE]: 'capsule',
-    [UOM.ML]: 'ml',
-    [UOM.LITER]: 'L',
-    [UOM.BOTTLE]: 'bottle',
-    [UOM.VIAL]: 'vial',
-    [UOM.AMPULE]: 'ampule',
-    [UOM.ROLL]: 'roll',
-    [UOM.PACK]: 'pack',
-    [UOM.BOX]: 'box',
-    [UOM.PAIR]: 'pair',
-    [UOM.UNIT]: 'unit',
-    [UOM.SET]: 'set',
-  };
-  return uomNames[uom];
-};
+// export const getUOMName = (uom: UOM): string => {
+//   const uomNames: Record<UOM, string> = {
+//     [UOM.PIECE]: 'pc',
+//     [UOM.TABLET]: 'tablet',
+//     [UOM.CAPSULE]: 'capsule',
+//     [UOM.ML]: 'ml',
+//     [UOM.LITER]: 'L',
+//     [UOM.BOTTLE]: 'bottle',
+//     [UOM.VIAL]: 'vial',
+//     [UOM.AMPULE]: 'ampule',
+//     [UOM.ROLL]: 'roll',
+//     [UOM.PACK]: 'pack',
+//     [UOM.BOX]: 'box',
+//     [UOM.PAIR]: 'pair',
+//     [UOM.UNIT]: 'unit',
+//     [UOM.SET]: 'set',
+//   };
+//   return uomNames[uom];
+// };

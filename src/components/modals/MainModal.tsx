@@ -56,7 +56,7 @@ export const MainModal: React.FC<ModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <div
-          className={`fixed inset-0 z-[999] flex items-center justify-center p-4 px-0 lg:p-5 xl:px-4 ${parentClassName}`}
+          className={`fixed inset-0 z-[99999] flex items-center justify-center p-4 px-0 lg:p-5 xl:px-4 ${parentClassName}`}
         >
           {!isFullscreen && (
             <motion.div

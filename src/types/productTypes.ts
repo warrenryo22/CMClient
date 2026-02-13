@@ -18,6 +18,7 @@ export class GetProductPaginatedDTO {
   UOM: UOM = UOM.ML;
   Quantity: number = 0;
   PackagingQty: number = 0;
+  AIRecommendation: string = '';
 
   constructor(init?: Partial<GetProductPaginatedDTO>) {
     return Object.assign(this, init);

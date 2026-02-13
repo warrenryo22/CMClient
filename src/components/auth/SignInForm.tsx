@@ -21,11 +21,13 @@ export default function SignInForm() {
       navigate("/");
     } else if (userClaims?.role == "STUDENTS") {
       navigate("/student-dashboard");
-    } else if(userClaims?.role == "DOCTORS"){
+    } else if (userClaims?.role == "TEACHERS") {
+      navigate("/student-dashboard");
+    } else if (userClaims?.role == "DOCTORS") {
       navigate("/doctor-dashboard");
-    } else if(userClaims?.role == "PROCUREMENT"){
+    } else if (userClaims?.role == "PROCUREMENT") {
       navigate("/stock-request-approval");
-    } else if(userClaims?.role == "STAFF"){
+    } else if (userClaims?.role == "STAFF") {
       navigate("/clinic-staff-dashboard");
     }
   }, [accessToken, navigate, userClaims]);

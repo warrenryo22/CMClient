@@ -106,12 +106,25 @@ export enum UOM {
   BOTTLE,
   VIAL,
   AMPULE,
-  ROLL,
+  SYRINGE,
+  TUBE,
+  SACHET,
+  DROP,
+  UNIT,
+  IU,
+  MG,
+  G,
+  MCG,
+  CREAM,
+  OINTMENT,
+  PATCH,
+  INHALER,
+  KIT,
+  SET,
   PACK,
   BOX,
+  ROLL,
   PAIR,
-  UNIT,
-  SET,
 }
 
 export enum FilterTimeIntervals {
@@ -141,8 +154,7 @@ export enum Position {
   DEPARTMENT_HEAD,
 }
 
-
 export enum Gender {
   MALE,
-  FEMALE
+  FEMALE,
 }

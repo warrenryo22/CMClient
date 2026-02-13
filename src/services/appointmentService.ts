@@ -138,6 +138,9 @@ class AppointmentService {
   async AssignedDoctorToAppointment(payload: SetDoctorAssignmentDTO): Promise<boolean> {
     try {
       await api.put(`appointment/assign-doctor-to-appointment`, payload);
+      successModalInstance.show({
+        message: `Doctor has been assigned`
+      });
       return true;
     } catch (error) {
       handleError(error);
