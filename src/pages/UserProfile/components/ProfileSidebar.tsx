@@ -39,27 +39,30 @@ const ProfileSidebar = ({ user }: ProfileSidebarProps) => {
             {user.FirstName} {user.MiddleName || ""} {user.LastName || ""}
           </h2>
         )}
-        {user.Role !== undefined && UserRoles[user.Role] && (
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {formatStatus(UserRoles[user.Role])}
-          </p>
-        )}
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          {user.StudentDetails &&
+            `Student No: ${user.StudentDetails.StudentNo}`}
+          {user.EmployeeDetails &&
+            `Employee No: ${user.EmployeeDetails.EmployeeNo}`}
+        </p>
       </div>
 
       {/* Personal Info */}
       <div className="px-6 py-5">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-          Personal Info
-        </h3>
         <div className="space-y-3.5">
           {user.Email && (
             <div>
-              <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
-                Email Address:
-              </label>
-              <p className="text-sm text-gray-900 dark:text-white break-words">
-                {user.Email}
-              </p>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                Personal Info
+              </h3>
+              <div>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">
+                  Email Address:
+                </label>
+                <p className="text-sm text-gray-900 dark:text-white break-words">
+                  {user.Email}
+                </p>
+              </div>
             </div>
           )}
 
