@@ -1,5 +1,5 @@
 import api from "@/api/axios";
-import { AdviserDTO, AppointmentData, MedicalRecordSummary } from "@/pages/UserProfile/types";
+import { AdviserDTO, AppointmentData, MedicalRecordSummary, StaffDTO } from "@/pages/UserProfile/types";
 import {
   GeneralResponse,
   GetPaginatedDTO,
@@ -138,6 +138,16 @@ class UserManagementService {
       return response.data.Data;
     } catch (error) {
       return [];
+    }
+  }
+
+  async GetAllStaff() : Promise<StaffDTO[]>
+  {
+    try {
+      const response = await api.get('users/get-all-staff');
+      return response.data.Data;
+    } catch (error) {
+      return []
     }
   }
 }

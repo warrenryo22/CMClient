@@ -3,10 +3,12 @@ import {
   Folder,
   Footprints,
   Home,
+  Hospital,
   LayoutDashboard,
   NotebookText,
   Package,
   ShoppingBag,
+  Siren,
   UserRound,
   Users,
 } from "lucide-react";
@@ -37,7 +39,8 @@ export type MenuType =
   | "inventory"
   | "system"
   | "scheduling"
-  | "confidentials";
+  | "confidentials"
+  | "system";
 
 export const MenuLabels: Record<MenuType, string> = {
   main: "Main",
@@ -128,7 +131,7 @@ export const menuAuthorize: MenuGroup[] = [
       },
     ],
   },
-   {
+  {
     menuType: "main",
     items: [
       {
@@ -242,6 +245,23 @@ export const menuAuthorize: MenuGroup[] = [
         name: "Request Certificates",
         path: "/all-request-certificates",
         access: SYSTEMACCESS.REQUEST_CERTIFICATES,
+      },
+    ],
+  },
+  {
+    menuType: "system",
+    items: [
+      {
+        icon: <Hospital />,
+        name: "Hospitals",
+        path: "/all-hospitals",
+        access: SYSTEMACCESS.ALL_HOSPITALS,
+      },
+      {
+        icon: <Siren />,
+        name: "Emergency Cases",
+        path: "/emergency-cases",
+        access: SYSTEMACCESS.EMERGENCY_CASE,
       },
     ],
   },

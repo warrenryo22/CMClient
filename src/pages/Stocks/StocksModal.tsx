@@ -40,7 +40,7 @@ const StocksModal = ({ isOpen, onClose, poId }: StocksModalProps) => {
   const [submitLoading, setSubmitLoading] = useTransition();
   const [fetchPOLoading, setFetchPOLoading] = useTransition();
 
-  const {  watch, handleSubmit, control, reset, setValue } =
+  const { watch, handleSubmit, control, reset, setValue } =
     useForm<CreateDeliveryProductsDTOP>();
 
   useEffect(() => {
@@ -132,42 +132,6 @@ const StocksModal = ({ isOpen, onClose, poId }: StocksModalProps) => {
         <>
           <ContentLoading isLoading={fetchPOLoading} className="h-50">
             <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-4">
-                <Label
-                  htmlFor="findings"
-                  className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-700"
-                >
-                  Notes (optional)
-                </Label>
-                <Controller
-                  control={control}
-                  name="Notes"
-                  render={({ field, fieldState }) => (
-                    <>
-                      <TextArea
-                        placeholder="Enter your notes here"
-                        {...field}
-                        value={field.value ?? ""}
-                        readonly={poId ? true : false}
-                        className={`
-                          min-h-24 resize-none border-slate-200 focus:border-sky-500 focus:ring-sky-500
-                          ${
-                            fieldState.error
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }
-                      `}
-                        rows={4}
-                      />
-                      {fieldState.error && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {fieldState.error.message}
-                        </p>
-                      )}
-                    </>
-                  )}
-                />
-              </div>
               {!poId && (
                 <div className="flex items-center w-full gap-3">
                   <SearchablePaginatedSelect
@@ -260,7 +224,8 @@ const StocksModal = ({ isOpen, onClose, poId }: StocksModalProps) => {
                               </div>
                             </SimpleTableData>
                             <SimpleTableData>
-                              + {watch(`SelectedProducts.${index}.Receive`) || 0}
+                              +{" "}
+                              {watch(`SelectedProducts.${index}.Receive`) || 0}
                             </SimpleTableData>
                             {!poId && (
                               <SimpleTableData>
@@ -284,6 +249,42 @@ const StocksModal = ({ isOpen, onClose, poId }: StocksModalProps) => {
                     )}
                   </tbody>
                 </SimpleTable>
+              </div>
+              <div className="mb-4">
+                <Label
+                  htmlFor="findings"
+                  className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-700"
+                >
+                  Notes (optional)
+                </Label>
+                <Controller
+                  control={control}
+                  name="Notes"
+                  render={({ field, fieldState }) => (
+                    <>
+                      <TextArea
+                        placeholder="Enter your notes here"
+                        {...field}
+                        value={field.value ?? ""}
+                        readonly={poId ? true : false}
+                        className={`
+                          min-h-24 resize-none border-slate-200 focus:border-sky-500 focus:ring-sky-500
+                          ${
+                            fieldState.error
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          }
+                      `}
+                        rows={4}
+                      />
+                      {fieldState.error && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {fieldState.error.message}
+                        </p>
+                      )}
+                    </>
+                  )}
+                />
               </div>
               <div className="flex gap-1.5 justify-end mt-4">
                 <Button

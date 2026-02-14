@@ -46,8 +46,8 @@ const Walkins = () => {
       UserRole : formData.role
     })
     const isValid = await walkinService.VerifiyStudentNo(payload);
-    setIsIdValidated(isValid);
-    return isValid;
+    setIsIdValidated(isValid.IsValid);
+    return isValid.IsValid;
   };
 
   const handleSubmit = async () => {

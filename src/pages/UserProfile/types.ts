@@ -28,7 +28,6 @@ export interface UserProfileData {
   staffDetails?: StaffDetailsDTO;
 
   // Additional employee-like fields for teachers/staff
-  
 }
 
 export class UserProfileData {
@@ -102,10 +101,19 @@ export class MedicalCertificateDTO {
   }
 }
 
-
 export class AdviserDTO {
-  Id : number = 0;
+  Id: number = 0;
   Name: string = "";
+
+  constructor(init?: Partial<AdviserDTO>) {
+    return Object.assign(this, init);
+  }
+}
+
+export class StaffDTO {
+  id: number = 0;
+  name: string = "";
+  role: UserRoles = UserRoles.DOCTORS;
 
   constructor(init?: Partial<AdviserDTO>) {
     return Object.assign(this, init);

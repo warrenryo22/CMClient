@@ -26,6 +26,9 @@ import AllStudentMedicalRecords from "@/pages/MedicalRecords/StudentMedicalRecor
 import { CertificatePreview, MedicalCertificateForm} from "@/pages/MedicalCertificate";
 import AllMedCertRequest from "@/pages/MedicalCertificate/AllMedCertRequest";
 import Home from "@/pages/Home";
+import EmergencyCaseV2 from "@/pages/EmergencyCaseV2";
+import CreateEmergencyCase from "@/pages/EmergencyCaseV2/CreateEmergencyCase";
+import AllHospitals from "@/pages/Hospital/AllHospitals";
 
 export const routes: RouteObject[] = [
     buildPublicRoute('/login', SignIn),
@@ -71,6 +74,11 @@ export const routes: RouteObject[] = [
      buildRoute({ path: '/all-request-certificates', component: AllMedCertRequest, accessRights: SYSTEMACCESS.REQUEST_CERTIFICATES }),
      buildRoute({ path: '/create-medical-cert/:reqId', component: MedicalCertificateForm, accessRights: SYSTEMACCESS.REQUEST_CERTIFICATES }),
      buildRoute({ path: '/medical-certificate/view/:medId', component: CertificatePreview, accessRights: SYSTEMACCESS.REQUEST_CERTIFICATES }),
+
+     buildRoute({ path: '/emergency-cases', component: EmergencyCaseV2, accessRights: SYSTEMACCESS.EMERGENCY_CASE }),
+     buildRoute({ path: '/create-emergency-case', component: CreateEmergencyCase, accessRights: SYSTEMACCESS.EMERGENCY_CASE }),
+     buildRoute({ path: '/all-hospitals', component: AllHospitals, accessRights: SYSTEMACCESS.ALL_HOSPITALS }),
+
 
 
 

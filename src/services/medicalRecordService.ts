@@ -4,11 +4,18 @@ import {
   MedicalCertificateFormDataDTO,
 } from "@/pages/MedicalCertificate/types";
 import { MedicalCertificateDTO } from "@/pages/UserProfile/types";
+import {
+  EmergencyCaseV2DTO,
+  HospitalInfoDTO,
+} from "@/types/emergencyCaseV2Types";
 import { GetPaginatedDTO, PaginatedTableResponse } from "@/types/globalTypes";
 import {
   AddVitalSignsDTO,
   CreateCheckupDetailsDTO,
+  CreateHospitalDTO,
   ExportMedicalResponseData,
+  GetCaseDetailsDTO,
+  GetCasesDTO,
   GetInitialMedicalRecordsDTO,
   GetMedicalRecordDetailsDTO,
   MedicalRecordsPaginatedDTO,
@@ -184,17 +191,110 @@ class MedicalRecordService {
 
   async GetMedicalCertificates(
     userDetailsId: number,
-    isWalkin: boolean
+    isWalkin: boolean,
   ): Promise<MedicalCertificateDTO[]> {
     try {
-      const response = await api.get(`medicalrecords/list-medical-records/${userDetailsId}`, {
-        params: {
-          is_walkin: isWalkin
-        }
-      });
+      const response = await api.get(
+        `medicalrecords/list-medical-records/${userDetailsId}`,
+        {
+          params: {
+            is_walkin: isWalkin,
+          },
+        },
+      );
       return response.data.Data;
     } catch (error) {
       return [];
+    }
+  }
+
+  async GetAllHospitals(): Promise<HospitalInfoDTO[]> {
+    try {
+      const response = await api.get("medicalrecords/get-all-hospitals");
+      return response.data.Data;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async CreateEmergencyCase(payload: EmergencyCaseV2DTO): Promise<boolean> {
+    try {
+      await api.post("medicalrecords/create-emergency-case", payload);
+      successModalInstance.show({
+        message: "Emergency case has been created",
+      });
+      return true;
+    } catch (error) {
+      handleError(error);
+      return false;
+    }
+  }
+
+  async GetCasesPaginated(
+    payload: GetPaginatedDTO,
+  ): Promise<PaginatedTableResponse<GetCasesDTO>> {
+    try {
+      const response = await api.get("medicalrecords/get-cases-paginated", {
+        params: payload,
+      });
+
+      return response.data.Data;
+    } catch (error) {
+      return new PaginatedTableResponse<GetCasesDTO>();
+    }
+  }
+
+  async GetSingleCase(caseId: number): Promise<GetCaseDetailsDTO> {
+    try {
+      const response = await api.get(`medicalrecords/get-case-by-id/${caseId}`);
+      return response.data.Data;
+    } catch (error) {
+      return new GetCaseDetailsDTO();
+    }
+  }
+
+  async CreateHospital(payload: CreateHospitalDTO): Promise<boolean> {
+    try {
+      await api.post("medicalrecords/create-hospital", payload);
+      successModalInstance.show({
+        message: "Hospital has been created",
+      });
+      return true;
+    } catch (error) {
+      handleError(error);
+      return false;
+    }
+  }
+
+  async UpdateHospital(
+    hospitalId: number,
+    payload: CreateHospitalDTO,
+  ): Promise<boolean> {
+    try {
+      await api.put(`medicalrecords/update-hospital/${hospitalId}`, payload);
+      successModalInstance.show({
+        message: "Hospital has been updated",
+      });
+      return true;
+    } catch (error) {
+      handleError(error);
+      return false;
+    }
+  }
+
+  async GetAllHospitalsPaginated(
+    payload: GetPaginatedDTO,
+  ): Promise<PaginatedTableResponse<CreateHospitalDTO>> {
+    try {
+      const response = await api.get(
+        "medicalrecords/get-hospital-paginated",
+        {
+          params: payload,
+        },
+      );
+      return response.data.Data;
+    } catch (error) {
+      return new PaginatedTableResponse<CreateHospitalDTO>();
     }
   }
 }
