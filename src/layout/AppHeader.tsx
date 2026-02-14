@@ -4,15 +4,17 @@ import { Link } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
 import UserDropdown from "../components/header/UserDropdown";
 import { ChevronLeftCircle, ChevronRightCircle, X } from "lucide-react";
-
-const AppHeader: React.FC = () => {
+interface HeaderProps {
+  sidebarWidth?: string;
+}
+const AppHeader: React.FC<HeaderProps> = ({ sidebarWidth }) => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar, isExpanded } =
     useSidebar();
 
   const handleToggle = () => {
-    if (window.innerWidth >= 1024) {
+    if (window.innerWidth >= 1080) {
       toggleSidebar();
     } else {
       toggleMobileSidebar();
@@ -42,11 +44,19 @@ const AppHeader: React.FC = () => {
 
   return (
     //z - 99999
-    <header className="sticky top-0 flex w-full bg-white border-gray-200 z-999  dark:border-neutral-900 dark:bg-gray-900 lg:border-b">
+    <header
+      className="sticky top-0 flex w-full bg-white border-gray-200 z-99  dark:border-neutral-900 dark:bg-gray-900 lg:border-b"
+      style={{
+        marginLeft: "0",
+        width: isMobileOpen ? "100%" : `calc(100% - ${sidebarWidth})`,
+      }}
+    >
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
           <button
-            className="items-center justify-center text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 lg:flex dark:text-gray-400 "
+            className={`items-center justify-center  w-10 h-10 text-gray-500 border-gray-200 rounded-lg z-99999 dark:border-gray-800 flex dark:text-gray-400 lg:h-11 lg:w-11 lg:border ${
+              isMobileOpen ? "bg-gray-100 dark:bg-white/[0.03]" : ""
+            }`}
             onClick={handleToggle}
             aria-label="Toggle Sidebar"
           >
@@ -62,16 +72,16 @@ const AppHeader: React.FC = () => {
 
           <Link to="/" className="lg:hidden">
             <img
-              src="/photos/logo/TahoStoryLogoWithColor.png"
+              src="/photos/logo/logo.png"
               alt="Logo"
-              width={100}
+              width={40}
               className="block dark:hidden"
             />
 
             <img
-              src="/photos/logo/TahoStoryFullWhite.png"
+              src="/photos/logo/logo.png"
               alt="Logo"
-              width={100}
+              width={40}
               className="hidden dark:block"
             />
           </Link>

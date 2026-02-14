@@ -52,6 +52,7 @@ const IdleLogoutHandler = () => {
       title="Are you still there?"
       isOpen={isModalOpen}
       onClose={handleModalOk}
+      parentClassName="z-[99999]"
       className="max-w-lg"
     >
       <p>

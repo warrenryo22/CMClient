@@ -310,37 +310,25 @@ const ViewMedical = () => {
                     Medications / Items Provided
                   </h2>
                   <div className="space-y-3">
-                    {medicalRecord?.ItemsProvided?.length > 0 && (
-                      <section className="border-b border-gray-200 pb-6 medical-record-section">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                          <Pill className="w-5 h-5 text-sky-700" />
-                          Medications / Items Provided
-                        </h2>
+                    {medicalRecord.ItemsProvided.map((item, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-50 p-4 rounded-lg border border-gray-200"
+                      >
+                        <p className="font-semibold text-gray-900">
+                          {item.Product.Title}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Quantity: {item.Quantity} {UOM[item.Product.UOM]}
+                        </p>
 
-                        <div className="space-y-3">
-                          {medicalRecord.ItemsProvided.map((item, index) => (
-                            <div
-                              key={index}
-                              className="bg-gray-50 p-4 rounded-lg border border-gray-200"
-                            >
-                              <p className="font-semibold text-gray-900">
-                                {item.Product.Title}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                Quantity: {item.Quantity}{" "}
-                                {UOM[item.Product.UOM] || "pcs"}
-                              </p>
-
-                              {item.Notes && (
-                                <p className="text-sm text-gray-700 italic mt-2">
-                                  Instructions: {item.Notes}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </section>
-                    )}
+                        {item.Notes && (
+                          <p className="text-sm text-gray-700 italic mt-2">
+                            Instructions: {item.Notes}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </section>
               )}

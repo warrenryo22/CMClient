@@ -224,9 +224,7 @@ const AppSidebar: React.FC = () => {
     >
       <div className="absolute inset-0 bg-primary-story-black/70 -z-1 backdrop-blur-[2px] dark:bg-gray-900/85"></div>
       <div
-        className={`py-8 flex ${
-          !isExpanded && !isHovered ? "lg:justify-center" : "justify-center"
-        }`}
+        className={`mt-6  ${isMobileOpen && "lg:mt-20"} py-4 lg:py-8 flex justify-center`}
       >
         <Link to="/">
           {isExpanded || isHovered || isMobileOpen ? (
